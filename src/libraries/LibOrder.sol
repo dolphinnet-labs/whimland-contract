@@ -61,31 +61,45 @@ library LibOrder {
 
     OrderKey public constant ORDERKEY_SENTINEL = OrderKey.wrap(0x0);
 
-    bytes32 public constant ASSET_TYPEHASH = keccak256("Asset(uint256 tokenId,address collection,uint96 amount)");
+    bytes32 public constant ASSET_TYPEHASH =
+        keccak256(
+            "Asset(uint256 tokenId,address collectionAddr,uint96 amount)"
+        );
 
-    bytes32 public constant ORDER_TYPEHASH = keccak256(
-        "Order(uint8 side,uint8 saleKind,address maker,Asset nft,uint128 price,uint64 expiry,uint64 salt)Asset(uint256 tokenId,address collection,uint96 amount)"
-    );
+    bytes32 public constant ORDER_TYPEHASH =
+        keccak256(
+            "Order(uint8 side,uint8 saleKind,address maker,Asset nft,uint128 price,uint64 expiry,uint64 salt)Asset(uint256 tokenId,address collectionAddr,uint96 amount)"
+        );
 
     function hash(Asset memory asset) internal pure returns (bytes32) {
-        return keccak256(abi.encode(ASSET_TYPEHASH, asset.tokenId, asset.collectionAddr, asset.amount));
+        return
+            keccak256(
+                abi.encode(
+                    ASSET_TYPEHASH,
+                    asset.tokenId,
+                    asset.collectionAddr,
+                    asset.amount
+                )
+            );
     }
 
     function hash(Order memory order) internal pure returns (OrderKey) {
-        return OrderKey.wrap(
-            keccak256(
-                abi.encodePacked(
-                    ORDER_TYPEHASH,
-                    order.side,
-                    order.saleKind,
-                    order.maker,
-                    hash(order.nft),
-                    Price.unwrap(order.price),
-                    order.expiry,
-                    order.salt
+        return
+            OrderKey.wrap(
+                keccak256(
+                    abi.encode(
+                        ORDER_TYPEHASH,
+                        order.side,
+                        order.saleKind,
+                        order.maker,
+                        hash(order.nft),
+                        Price.unwrap(order.price),
+                        order.currency,
+                        order.expiry,
+                        order.salt
+                    )
                 )
-            )
-        );
+            );
     }
 
     function isSentinel(OrderKey orderKey) internal pure returns (bool) {
